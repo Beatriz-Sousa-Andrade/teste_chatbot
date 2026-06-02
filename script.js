@@ -1,10 +1,7 @@
-
-
-// No script.js, altere para:
-const socket = io('https://chatbot-gemini-b9jl.onrender.com', {
-    transports: ['websocket'], // Força o uso de WebSocket em vez de polling
-    secure: true
-}); 
+// URL do backend (detecta automaticamente se está em localhost ou produção no Render)
+const URL_BACKEND = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:6500'
+    : 'https://chatbot-gemini-b9jl.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     let socket = null;
@@ -78,7 +75,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-        socket = io(URL_BACKEND);
+        // Configurações da conexão Socket.IO
+        const options = {
+            transports: ['websocket']
+        };
+
+        // Adiciona segurança caso o backend esteja usando protocolo seguro (HTTPS)
+        if (URL_BACKEND.startsWith('https')) {
+            options.secure = true;
+        }
+
+        console.log(`Tentando conectar ao backend em: ${URL_BACKEND}`);
+        socket = io(URL_BACKEND, options);
 
         socket.on('connect', () => {
             console.log('Conectado ao servidor Socket.IO! SID:', socket.id);
