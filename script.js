@@ -1,6 +1,10 @@
 
 
-const URL_BACKEND = 'https://chatbot-gemini-b9jl.onrender.com' 
+// No script.js, altere para:
+const socket = io('https://chatbot-gemini-b9jl.onrender.com', {
+    transports: ['websocket'], // Força o uso de WebSocket em vez de polling
+    secure: true
+}); 
 
 document.addEventListener('DOMContentLoaded', () => {
     let socket = null;
