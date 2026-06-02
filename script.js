@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Configurações da conexão Socket.IO
+        // Configurações da conexão Socket.IO (permite polling como fallback com upgrade para websocket)
         const options = {
-            transports: ['websocket']
+            transports: ['polling', 'websocket']
         };
 
         if (URL_BACKEND.startsWith('https')) {
