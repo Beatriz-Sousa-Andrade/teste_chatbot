@@ -56,10 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-        // ALTERAÇÃO 1: Forçando o transporte apenas para 'websocket' para reduzir latência
+    // Remova o 'transports: ['websocket']' forçado. 
+    // Deixe o socket.io decidir o melhor método.
         socket = io(URL_BACKEND, {
-            transports: ['websocket'] 
-        });
+            reconnectionAttempts: 5,
+            timeout: 10000 // Aumenta o tempo de espera antes de desistir
+    });
 
         socket.on('connect', () => {
             connectionStatus.textContent = 'Conectado';
