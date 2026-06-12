@@ -3,40 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arquivo X | Central de Investigação</title>
+    <title>Chatbot com Flask-SocketIO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-wrapper">
-        <aside class="sidebar">
-            <div class="logo">
-                <h2>📁 Arquivo X</h2>
-            </div>
-            <nav class="controles">
-                <button id="iniciarBtn" class="btn-primary">Iniciar Sessão</button>
-                <button id="limparBtn" class="btn-secondary">Limpar Histórico</button>
-                <button id="encerrarBtn" class="btn-danger">Encerrar Sessão</button>
-            </nav>
-            <div class="status-panel">
-                <p>Status da Conexão:</p>
-                <div id="connection-status" class="status-offline">Offline</div>
-            </div>
-        </aside>
+    <div class="chat-container">
+      <figure>
+          <img src="https://img.freepik.com/vetores-premium/chatbot-rede-neural-ai-servidores-e-tecnologia-de-robos-cute-chatbot-ai-personagem_651808-563.jpg?semt=ais_hybrid&w=740">
+      </figure>
+        <div id="controles">
+            <button id="iniciarBtn">Iniciar conversa</button>
+            <button id="limparBtn">Limpar tela</button>
+            <button id="encerrarBtn">Encerrar conversa</button>
+      </div>
+    </div>
 
-        <main class="chat-main">
-            <header class="chat-header">
-                <h1>Interface de Consulta Paranormal</h1>
-            </header>
-            <div id="chat-box" class="chat-box">
-                <div class="message bot-message">
-                    <strong>Sistema:</strong> Digite um comando ou tema para iniciar uma consulta ao banco de dados sobrenatural.
-                </div>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>Chatbot Amigável</h1>
+            <div id="connection-status" class="status-offline">Conectando...</div>
+        </header>
+        <div id="chat-box" class="chat-box">
             </div>
-            <footer class="chat-input-area">
-                <input type="text" id="message-input" placeholder="Investigar lenda, avistamento, ocultismo...">
-                <button id="send-button">Enviar</button>
-            </footer>
-        </main>
+        <footer class="chat-input-area">
+            <input type="text" id="message-input" placeholder="Digite sua mensagem aqui...">
+            <button id="send-button">Enviar</button>
+        </footer>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -44,4 +36,6 @@
     <script src="script.js"></script>
 </body>
 </html>
+  
+
   
