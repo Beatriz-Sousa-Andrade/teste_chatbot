@@ -66,11 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-        // Conecta ao backend (ajuste a URL conforme necessário)
-        socket = io(URL_BACKEND, {
-            transports: ['polling', 'websocket'],
-            timeout: 60000
-        });
+            socket = io(URL_BACKEND, {
+                transports: ['polling', 'websocket'], // Mantém o polling para o handshake
+                withCredentials: false,               // MUDE PARA FALSE (Isso costuma resolver o CORS em muitos casos)
+                reconnection: true,
+                timeout: 60000
+            });
 
         socket.on('connect', () => {
             connectionStatus.textContent = 'Conectado';
