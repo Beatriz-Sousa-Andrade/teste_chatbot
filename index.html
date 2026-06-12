@@ -3,32 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot com Flask-SocketIO</title>
+    <title>ORDO REALITAS | Terminal de Investigação</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="chat-container">
-      <figure>
-          <img src="https://img.freepik.com/vetores-premium/chatbot-rede-neural-ai-servidores-e-tecnologia-de-robos-cute-chatbot-ai-personagem_651808-563.jpg?semt=ais_hybrid&w=740">
-      </figure>
-        <div id="controles">
-            <button id="iniciarBtn">Iniciar conversa</button>
-            <button id="limparBtn">Limpar tela</button>
-            <button id="encerrarBtn">Encerrar conversa</button>
-      </div>
-    </div>
 
-    <div class="chat-container">
-        <header class="chat-header">
-            <h1>Chatbot Amigável</h1>
-            <div id="connection-status" class="status-offline">Conectando...</div>
-        </header>
-        <div id="chat-box" class="chat-box">
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <h1 class="logo">ORDO REALITAS</h1>
+                <p class="sub-logo">Terminal de Comunicação E.V.P.</p>
+                
+                <div class="controls-group">
+                    <button id="iniciarBtn">Iniciar Sessão</button>
+                    <button id="limparBtn">Limpar Logs</button>
+                </div>
             </div>
-        <footer class="chat-input-area">
-            <input type="text" id="message-input" placeholder="Digite sua mensagem aqui...">
-            <button id="send-button">Enviar</button>
-        </footer>
+
+            <div class="sidebar-bottom">
+                <div id="connection-status" class="status-offline">
+                    <span class="pulse-dot"></span>
+                    <span id="status-text">Desconectado</span>
+                </div>
+                <button id="encerrarBtn">Encerrar Conexão</button>
+            </div>
+        </aside>
+
+        <main class="chat-wrapper">
+            <header class="chat-header">
+                <span class="investigation-id">Investigação ID: #882-PSI</span>
+                <span class="restricted-badge">● ÁREA RESTRITA</span>
+            </header>
+
+            <div id="chat-box" class="chat-box">
+                </div>
+
+            <footer class="chat-input-area">
+                <input type="text" id="message-input" placeholder="Digite a mensagem de frequência...">
+                <button id="send-button">Transmitir</button>
+            </footer>
+        </main>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
