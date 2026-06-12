@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM totalmente carregado. Inicializando chatbot...');
     let socket = null;
     
-    // MUDANÇA: Geramos ou recuperamos o ID do usuário localmente
     let userSessionId = localStorage.getItem('chat_session_id');
     if (!userSessionId) {
         userSessionId = crypto.randomUUID();
@@ -33,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addMessageToChat(sender, text, type = 'normal') {
         const messageElement = document.createElement('div');
+        // Adiciona uma classe de identificação para facilitar a remoção do "loading"
+        if(type === 'loading') messageElement.id = 'bot-loading-msg';
+        
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : (sender === 'bot' ? 'bot-message' : 'status-message'));
 
         const senderSpan = document.createElement('strong');
@@ -54,7 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-        socket = io(URL_BACKEND);
+        // ALTERAÇÃO 1: Forçando o transporte apenas para 'websocket' para reduzir latência
+        socket = io(URL_BACKEND, {
+            transports: ['websocket'] 
+        });
 
         socket.on('connect', () => {
             connectionStatus.textContent = 'Conectado';
@@ -65,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         socket.on('nova_mensagem', (data) => {
+            // ALTERAÇÃO 2: Remove o feedback visual de "..." quando a resposta chega
+            const loading = document.getElementById('bot-loading-msg');
+            if(loading) loading.remove();
+            
             addMessageToChat('bot', data.texto);
         });
 
@@ -78,11 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function sendMessageToServer() {
         const messageText = messageInput.value.trim();
-        if (messageText === '' || !socket.connected) return;
+        if (messageText === '' || !socket || !socket.connected) return;
 
         addMessageToChat('user', messageText);
         
-        // MUDANÇA: Enviamos o ID manualmente junto com a mensagem
+        // ALTERAÇÃO 3: Adiciona o feedback visual imediato de "processando"
+        addMessageToChat('bot', 'A Membrana está sendo consultada...', 'loading');
+        
         socket.emit('enviar_mensagem', { 
             mensagem: messageText, 
             session_id: userSessionId 
