@@ -75,9 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
+        // Dentro da função iniciarConversa()
         socket = io(URL_BACKEND, {
-                withCredentials: true,
-                transports: ['websocket', 'polling'] });
+    transports: ['websocket'], // Força o WebSocket
+    secure: true,              // Garante que tentará wss://
+    rejectUnauthorized: false  // Útil se houver problemas com certificado SSL no Render
+});
 
         socket.on('connect', () => {
             console.log('Conectado ao servidor Socket.IO! SID:', socket.id);
