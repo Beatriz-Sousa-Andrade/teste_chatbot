@@ -56,12 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-    // Remova o 'transports: ['websocket']' forçado. 
-    // Deixe o socket.io decidir o melhor método.
+        // REMOVEMOS o 'transports: ['websocket']'
+        // Isso permite que ele tente HTTP (polling) e depois suba para WebSocket
         socket = io(URL_BACKEND, {
-            reconnectionAttempts: 5,
-            timeout: 10000 // Aumenta o tempo de espera antes de desistir
-    });
+            withCredentials: true,
+            transports: ['polling', 'websocket'], // Tenta polling primeiro
+            reconnection: true
+        });
 
         socket.on('connect', () => {
             connectionStatus.textContent = 'Conectado';
@@ -72,10 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         socket.on('nova_mensagem', (data) => {
-            // ALTERAÇÃO 2: Remove o feedback visual de "..." quando a resposta chega
             const loading = document.getElementById('bot-loading-msg');
             if(loading) loading.remove();
-            
             addMessageToChat('bot', data.texto);
         });
 
@@ -84,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
             connectionStatus.className = 'status-offline';
             messageInput.disabled = true;
             sendButton.disabled = true;
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Erro na conexão:', err);
+            addMessageToChat('status', 'Falha ao conectar. Verifique o console.');
         });
     }
 
