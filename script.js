@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 transports: ['polling', 'websocket'], // Mantém o polling para o handshake
                 withCredentials: false,               // MUDE PARA FALSE (Isso costuma resolver o CORS em muitos casos)
                 reconnection: true,
-                timeout: 60000
+                timeout: 6000
             });
 
         socket.on('connect', () => {
