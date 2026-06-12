@@ -1,87 +1,58 @@
-const URL_BACKEND = (window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1')
+// Configuração da URL com detecção automática de ambiente
+const URL_BACKEND = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:6500'
     : 'https://chatbot-gemini-b9jl.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     let socket = null;
+    
+    // Recupera ou cria ID de sessão persistente
+    let userSessionId = localStorage.getItem('chat_session_id') || crypto.randomUUID();
+    localStorage.setItem('chat_session_id', userSessionId);
 
-    // Recupera ou cria um ID único para o usuário no navegador
-    let userSessionId = localStorage.getItem('chat_session_id');
-    if (!userSessionId) {
-        userSessionId = crypto.randomUUID();
-        localStorage.setItem('chat_session_id', userSessionId);
-    }
-
+    // Seletores DOM
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     const connectionStatus = document.getElementById('connection-status');
     const iniciarBtn = document.getElementById('iniciarBtn');
-    const encerrarBtn = document.getElementById('encerrarBtn');
-    const limparBtn = document.getElementById('limparBtn');
 
+    // Utilitário para adicionar mensagens (com suporte a Markdown)
     function addMessageToChat(sender, text, type = 'normal') {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${type}-message ${sender}-message`;
+        
+        // Se a biblioteca 'marked' estiver carregada, renderiza markdown, senão usa texto puro
+        const content = (type === 'normal' && typeof marked !== 'undefined') 
+            ? marked.parse(text) 
+            : text;
 
-        if (sender.toLowerCase() === 'user') {
-            messageElement.classList.add('user-message');
-            sender = 'Você';
-        } else if (sender.toLowerCase() === 'bot') {
-            messageElement.classList.add('bot-message');
-            sender = 'Bot';
-        } else {
-            messageElement.classList.add('status-message');
-        }
-
-        if (type === 'error') {
-            messageElement.classList.add('error-text');
-            sender = 'Erro';
-        } else if (type === 'status') {
-            messageElement.classList.add('status-text');
-            sender = 'Status';
-        }
-
-        const senderSpan = document.createElement('strong');
-        senderSpan.textContent = `${sender}: `;
-        messageElement.appendChild(senderSpan);
-
-        const textSpan = document.createElement('span');
-        if (type === 'normal' && typeof marked !== 'undefined') {
-            textSpan.innerHTML = marked.parse(text);
-        } else {
-            textSpan.textContent = text;
-        }
-        messageElement.appendChild(textSpan);
-        chatBox.appendChild(messageElement);
+        msgDiv.innerHTML = `<strong>${sender}:</strong> <span>${content}</span>`;
+        chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function setChatEnabled(enabled) {
-        messageInput.disabled = !enabled;
-        sendButton.disabled = !enabled;
-    }
-
+    // Gerenciador de conexão
     function iniciarConversa() {
-        if (socket && socket.connected) return;
+        if (socket?.connected) return;
 
-            socket = io(URL_BACKEND, {
-                transports: ['polling', 'websocket'], // Mantém o polling para o handshake
-                withCredentials: false,               // MUDE PARA FALSE (Isso costuma resolver o CORS em muitos casos)
-                reconnection: true,
-                timeout: 6000
-            });
+        addMessageToChat('Sistema', 'Conectando à Membrana...', 'status');
+
+        socket = io(URL_BACKEND, {
+            transports: ['polling', 'websocket'],
+            upgrade: true,
+            timeout: 2000
+        });
 
         socket.on('connect', () => {
             connectionStatus.textContent = 'Conectado';
             connectionStatus.className = 'status-online';
-            addMessageToChat('Status', 'Conectado à Membrana.', 'status');
-            setChatEnabled(true);
+            addMessageToChat('Sistema', 'Conexão estabelecida.', 'status');
+            messageInput.disabled = false;
         });
 
         socket.on('nova_mensagem', (data) => {
-            addMessageToChat('bot', data.texto);
+            addMessageToChat('Bot', data.texto);
         });
 
         socket.on('erro', (data) => {
@@ -91,29 +62,27 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.on('disconnect', () => {
             connectionStatus.textContent = 'Desconectado';
             connectionStatus.className = 'status-offline';
-            setChatEnabled(false);
+            messageInput.disabled = true;
         });
     }
 
+    // Envio de mensagens com validação
     function sendMessageToServer() {
-        const messageText = messageInput.value.trim();
-        if (messageText === '' || !socket?.connected) return;
+        const text = messageInput.value.trim();
+        if (!text || !socket?.connected) return;
 
-        addMessageToChat('user', messageText);
+        addMessageToChat('Você', text, 'user');
         
-        // ENVIO DO SESSION_ID: 
-        // Agora enviamos o ID recuperado do localStorage para o servidor
         socket.emit('enviar_mensagem', { 
-            mensagem: messageText, 
+            mensagem: text, 
             session_id: userSessionId 
         });
         
         messageInput.value = '';
     }
 
+    // Listeners
     iniciarBtn.addEventListener('click', iniciarConversa);
-    encerrarBtn.addEventListener('click', () => socket?.disconnect());
-    limparBtn.addEventListener('click', () => chatBox.innerHTML = '');
     sendButton.addEventListener('click', sendMessageToServer);
     messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessageToServer());
 });
