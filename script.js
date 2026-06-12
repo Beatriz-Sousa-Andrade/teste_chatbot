@@ -75,7 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
-        socket = io(URL_BACKEND);
+        socket = io(URL_BACKEND, {
+                withCredentials: true,
+                transports: ['websocket', 'polling'] });
 
         socket.on('connect', () => {
             console.log('Conectado ao servidor Socket.IO! SID:', socket.id);
