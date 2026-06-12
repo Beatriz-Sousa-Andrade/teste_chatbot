@@ -1,6 +1,6 @@
 // Configuração da URL com detecção automática de ambiente
 const URL_BACKEND = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:6500'
+    ? 'http://localhost:5000'
     : 'https://chatbot-gemini-b9jl.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
