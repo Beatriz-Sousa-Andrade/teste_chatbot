@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (socket && socket.connected) return;
 
         // Dentro da função iniciarConversa()
-        addMessageToChat('Status', 'Tentando estabelecer conexão com ' + URL_BACKEND + '...', 'status');
+        addMessageToChat('Status', 'Sintonizando frequência E.V.P... Aguardando manifestação.', 'status');
         
         socket = io(URL_BACKEND, {
             secure: true,              // Garante que tentará wss://
