@@ -16,6 +16,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let userSessionId = null;
 
+    function showTypingIndicator() {
+        if (document.getElementById('typing-indicator')) return;
+        
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'bot-message');
+        messageElement.id = 'typing-indicator';
+        
+        const senderSpan = document.createElement('strong');
+        senderSpan.textContent = 'E.V.P.: ';
+        messageElement.appendChild(senderSpan);
+
+        const textSpan = document.createElement('span');
+        textSpan.classList.add('typing-animation');
+        textSpan.textContent = 'Decodificando sinal';
+        messageElement.appendChild(textSpan);
+
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
     // Função para adicionar mensagens no chat
     function addMessageToChat(sender, text, type = 'normal') {
         const messageElement = document.createElement('div');
@@ -23,10 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (sender.toLowerCase() === 'user') {
             messageElement.classList.add('user-message');
-            sender = 'Você';
+            sender = 'Agente';
         } else if (sender.toLowerCase() === 'bot') {
             messageElement.classList.add('bot-message');
-            sender = 'Bot';
+            sender = 'E.V.P.';
         } else {
             messageElement.classList.add('status-message');
         }
@@ -69,18 +96,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setChatEnabled(false);
     connectionStatus.textContent = 'Desconectado';
     connectionStatus.className = 'status-offline';
-    addMessageToChat('Status', 'Clique em "Iniciar conversa" para começar.', 'status');
+    addMessageToChat('Status', 'Clique em "Iniciar Sessão" para estabelecer conexão com o Outro Lado.', 'status');
 
     // Função para conectar ao servidor
     function iniciarConversa() {
         if (socket && socket.connected) return;
 
         // Dentro da função iniciarConversa()
+        addMessageToChat('Status', 'Tentando estabelecer conexão com ' + URL_BACKEND + '...', 'status');
+        
         socket = io(URL_BACKEND, {
-    transports: ['websocket'], // Força o WebSocket
-    secure: true,              // Garante que tentará wss://
-    rejectUnauthorized: false  // Útil se houver problemas com certificado SSL no Render
-});
+            secure: true,              // Garante que tentará wss://
+            rejectUnauthorized: false  // Útil se houver problemas com certificado SSL no Render
+        });
 
         socket.on('connect', () => {
             console.log('Conectado ao servidor Socket.IO! SID:', socket.id);
@@ -98,6 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
             setChatEnabled(false);
         });
 
+        socket.on('connect_error', (error) => {
+            console.error('Erro de conexão:', error);
+            addMessageToChat('Erro', 'Falha na conexão: ' + error.message + '. (O servidor pode estar dormindo ou offline)', 'error');
+            setChatEnabled(false);
+            connectionStatus.textContent = 'Erro de Conexão';
+            connectionStatus.className = 'status-offline';
+        });
+
         socket.on('status_conexao', (data) => {
             if (data.session_id) {
                 userSessionId = data.session_id;
@@ -105,10 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         socket.on('nova_mensagem', (data) => {
+            removeTypingIndicator();
             addMessageToChat(data.remetente, data.texto);
         });
 
         socket.on('erro', (data) => {
+            removeTypingIndicator();
             addMessageToChat('Erro', data.erro, 'error');
         });
     }
@@ -135,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (socket && socket.connected) {
             addMessageToChat('user', messageText);
+            showTypingIndicator();
             socket.emit('enviar_mensagem', { mensagem: messageText });
             messageInput.value = '';
             messageInput.focus();
